@@ -1,18 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlaylistButton : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private Button _button;
+
+    [SerializeField]
+    private Text _buttonText;
+
+    public Action OnPlaylistClicked;
+    public Playlist playlist;
+
+    private void Start()
     {
-        
+        _button?.onClick.AddListener(OnButtonClicked);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnButtonClicked()
     {
-        
+        OnPlaylistClicked?.Invoke();
+    }
+
+    public void SetButtonText(string text)
+    {
+        _buttonText.text = text;
     }
 }

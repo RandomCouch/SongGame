@@ -11,6 +11,12 @@ public class DataManager : MonoBehaviour
     [SerializeField]
     private LoadingScreen _loadingScreen;
 
+    [SerializeField]
+    private Transform _playlistContainer;
+
+    [SerializeField]
+    private PlaylistButton _playlistButtonPrefab;
+
     // Start is called before the first frame update
     private IEnumerator Start()
     {
@@ -60,9 +66,21 @@ public class DataManager : MonoBehaviour
             Debug.Log("Processed playlist " + playlist.playlist);
             float pProgress = (p + 1f) / (float)data.playlists.Length;
             _loadingScreen.UpdateMainLoadingCircle(pProgress);
+
+            PlaylistButton button = Instantiate(_playlistButtonPrefab, _playlistContainer);
+            button.SetButtonText(playlist.playlist);
+            button.OnPlaylistClicked += () =>
+            {
+                OnPlaylistClicked(playlist);
+            };
         }
         Debug.Log("Processed game data");
         yield return new WaitForSeconds(0.5f);
         _loadingScreen.gameObject.SetActive(false);
+    }
+
+    private void OnPlaylistClicked(Playlist playlist)
+    {
+        //dismiss select screen and show game screen with current playlist
     }
 }
