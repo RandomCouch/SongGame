@@ -43,3 +43,26 @@ public struct Song
     public Sprite pictureSprite;
     public AudioClip sampleClip;
 }
+
+[Serializable]
+public struct GameResults
+{
+    public string playlistName;
+    public RoundResult[] rounds;
+}
+
+[Serializable]
+public struct RoundResult
+{
+    public Song song;
+    public bool won;
+    public float time;
+}
+
+[Serializable]
+public struct Screen
+{
+    public string id;
+    public GameObject ScreenObject;
+}
+

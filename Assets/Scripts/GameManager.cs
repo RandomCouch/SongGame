@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Linq;
 
-public class DataManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     [SerializeField]
     private TextAsset _jsonFile;
@@ -17,10 +18,87 @@ public class DataManager : MonoBehaviour
     [SerializeField]
     private PlaylistButton _playlistButtonPrefab;
 
+    [SerializeField]
+    private List<Screen> _screens;
+
+    private AudioSource _audioSource;
+
+    public enum GameState
+    {
+        Loading,
+        SelectPlaylist,
+        GameScreen,
+        ScoreScreen
+    }
+
+    private GameState _state;
+
+    public GameState state
+    {
+        get
+        {
+            return _state;
+        }
+        set
+        {
+            if(_state != value)
+            {
+                _state = value;
+                OnStateChanged();
+            }
+        }
+    }
+
+    public static GameManager Instance;
+
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+
+        _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void OnStateChanged()
+    {
+        switch (state)
+        {
+            case GameState.Loading:
+                SwitchScreen("loading");
+                break;
+            case GameState.SelectPlaylist:
+                SwitchScreen("select");
+                break;
+            case GameState.GameScreen:
+                SwitchScreen("game");
+                break;
+            case GameState.ScoreScreen:
+                SwitchScreen("score");
+                break;
+        }
+    }
+
+    private void SwitchScreen(string id)
+    {
+        foreach(Screen screen in _screens)
+        {
+            if (screen.ScreenObject != null) {
+                screen.ScreenObject.SetActive(false);
+                if (screen.id.Equals(id))
+                {
+                    screen.ScreenObject.SetActive(true);
+                }
+            }
+        }
+    }
+
     // Start is called before the first frame update
     private IEnumerator Start()
     {
         //process json data into objects
+        state = GameState.Loading;
         GameData data = JsonUtility.FromJson<GameData>("{\"playlists\":" + _jsonFile.text + "}");
         for(int p = 0; p < data.playlists.Length; p++)
         {
@@ -76,11 +154,40 @@ public class DataManager : MonoBehaviour
         }
         Debug.Log("Processed game data");
         yield return new WaitForSeconds(0.5f);
-        _loadingScreen.gameObject.SetActive(false);
+
+        state = GameState.SelectPlaylist;
     }
 
     private void OnPlaylistClicked(Playlist playlist)
     {
-        //dismiss select screen and show game screen with current playlist
+        state = GameState.GameScreen;
+        GameScreen gameScreen = _screens.Where(x => x.id == "game").FirstOrDefault().ScreenObject.GetComponent<GameScreen>();
+        gameScreen.playlist = playlist;
+        
+    }
+
+    public void ShowScore(GameResults results)
+    {
+        state = GameState.ScoreScreen;
+        ScoreScreen scoreScreen = _screens.Where(x => x.id == "score").FirstOrDefault().ScreenObject.GetComponent<ScoreScreen>();
+        scoreScreen.results = results;
+    }
+
+    public void PlayAudio(AudioClip clip)
+    {
+        _audioSource.Stop();
+        _audioSource.clip = clip;
+        _audioSource.Play();
+    }
+
+    public void StopAudio()
+    {
+        _audioSource.Stop();
+    }
+
+
+    public void ResetGame()
+    {
+        state = GameState.SelectPlaylist;
     }
 }

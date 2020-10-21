@@ -4,17 +4,19 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlaylistButton : MonoBehaviour
+public class ChoiceButton : MonoBehaviour
 {
+    [SerializeField]
+    private Text _choiceText;
+
     private Button _button;
 
-    [SerializeField]
-    private Text _buttonText;
+    public Action<int> OnChoiceSelected;
 
-    public Action OnPlaylistClicked;
-    public Playlist playlist;
+    public int choiceIndex;
 
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(OnButtonClicked);
@@ -22,11 +24,11 @@ public class PlaylistButton : MonoBehaviour
 
     private void OnButtonClicked()
     {
-        OnPlaylistClicked?.Invoke();
+        OnChoiceSelected?.Invoke(choiceIndex);
     }
 
     public void SetButtonText(string text)
     {
-        _buttonText.text = text;
+        _choiceText.text = text;
     }
 }
